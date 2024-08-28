@@ -4,18 +4,20 @@ import com.hungnt.hello_world.dto.request.UserCreationRequest;
 import com.hungnt.hello_world.dto.request.UserUpdateRequest;
 import com.hungnt.hello_world.entity.User;
 import com.hungnt.hello_world.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController()
+@RequestMapping("/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/users")
-    User createUser(@RequestBody UserCreationRequest request) {
+    @PostMapping("/")
+    User createUser(@RequestBody @Valid UserCreationRequest request) {
     return userService.createUser(request);
     }
 
