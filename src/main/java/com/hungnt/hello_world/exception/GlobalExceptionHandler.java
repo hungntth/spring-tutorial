@@ -1,6 +1,6 @@
 package com.hungnt.hello_world.exception;
 
-import com.hungnt.hello_world.dto.request.ApiResponse;
+import com.hungnt.hello_world.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;

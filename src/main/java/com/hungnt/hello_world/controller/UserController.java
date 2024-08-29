@@ -1,6 +1,6 @@
 package com.hungnt.hello_world.controller;
 
-import com.hungnt.hello_world.dto.request.ApiResponse;
+import com.hungnt.hello_world.dto.response.ApiResponse;
 import com.hungnt.hello_world.dto.request.UserCreationRequest;
 import com.hungnt.hello_world.dto.request.UserUpdateRequest;
 import com.hungnt.hello_world.dto.response.UserResponse;
@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
 public class UserController {
     UserService userService;
 
-    @PostMapping("/")
+    @PostMapping("")
     ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
         ApiResponse<User> apiResponse = new ApiResponse<>();
 
@@ -30,7 +29,7 @@ public class UserController {
     return apiResponse;
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     List<User> getUsers(){
             return userService.findAllUser();
     }
