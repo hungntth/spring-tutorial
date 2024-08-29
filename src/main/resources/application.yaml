@@ -14,4 +14,4 @@ spring:
     show-sql: true
 
 jwt:
-  signerKey: 'hungnt123'
+  signerKey: '1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij'

@@ -5,6 +5,7 @@ import com.hungnt.hello_world.dto.request.IntrospectRequest;
 import com.hungnt.hello_world.dto.response.ApiResponse;
 import com.hungnt.hello_world.dto.response.AuthenticationResponse;
 import com.hungnt.hello_world.dto.response.IntrospectResponse;
+import com.hungnt.hello_world.entity.User;
 import com.hungnt.hello_world.exception.AppException;
 import com.hungnt.hello_world.exception.ErrorCode;
 import com.hungnt.hello_world.repository.UserRepository;
@@ -27,6 +28,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +39,7 @@ public class AuthenticationService {
 
     @NonFinal
     @Value("${jwt.signerKey}")
-    protected static String SIGNER_KEY ;
+    protected String SIGNER_KEY ;
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
@@ -53,33 +55,32 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(verified && expityTime.after(new Date())).build();
     }
 
-        public boolean authenticate(AuthenticationRequest request) {
-            var user = userRepository.findByUsername(request.getUsername())
+        public AuthenticationResponse authenticate(AuthenticationRequest request) {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            var user = userRepository
+                    .findByUsername(request.getUsername())
                     .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXSITS));
 
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
-            if(!authenticated)
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-            var token = generateToken(request.getUsername());
+            if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-            return AuthenticationResponse.builder()
-                    .token(token)
-                    .authenticated(true)
-                    .build().isAuthenticated();
+            var token = generateToken(user);
+
+            return AuthenticationResponse.builder().token(token).authenticated(true).build();
         }
 
-    private String generateToken (String username) {
+    private String generateToken (User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("hungnt")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
+                .jwtID(UUID.randomUUID().toString())
                 .claim("customClaim", "Custom")
                 .build();
 
