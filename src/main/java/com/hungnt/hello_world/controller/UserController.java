@@ -1,5 +1,6 @@
 package com.hungnt.hello_world.controller;
 
+import com.hungnt.hello_world.dto.request.ApiResponse;
 import com.hungnt.hello_world.dto.request.UserCreationRequest;
 import com.hungnt.hello_world.dto.request.UserUpdateRequest;
 import com.hungnt.hello_world.entity.User;
@@ -17,8 +18,11 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/")
-    User createUser(@RequestBody @Valid UserCreationRequest request) {
-    return userService.createUser(request);
+    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+
+        apiResponse.setResult(userService.createUser(request));
+    return apiResponse;
     }
 
     @GetMapping

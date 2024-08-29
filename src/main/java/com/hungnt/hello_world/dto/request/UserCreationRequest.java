@@ -1,12 +1,14 @@
 package com.hungnt.hello_world.dto.request;
 
+import com.hungnt.hello_world.exception.ErrorCode;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
 public class UserCreationRequest {
+    @Size(min = 3, message = "USERNAME_INVALID")
     private String username;
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @Size(min = 6, message = "PASSWORD_INVALI")
     private String password;
     private String firstName;
     private String lastName;
