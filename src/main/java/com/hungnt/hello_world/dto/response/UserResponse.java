@@ -1,5 +1,6 @@
-package com.hungnt.hello_world.dto.request;
+package com.hungnt.hello_world.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,11 +11,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @FieldDefaults( level = AccessLevel.PRIVATE)
-public class UserUpdateRequest {
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class UserResponse {
+     String id;
+     String username;
      String password;
      String firstName;
      String lastName;
      LocalDate dob;
-
 }
