@@ -2,7 +2,6 @@ package com.hungnt.hello_world.service;
 
 import com.hungnt.hello_world.dto.request.AuthenticationRequest;
 import com.hungnt.hello_world.dto.request.IntrospectRequest;
-import com.hungnt.hello_world.dto.response.ApiResponse;
 import com.hungnt.hello_world.dto.response.AuthenticationResponse;
 import com.hungnt.hello_world.dto.response.IntrospectResponse;
 import com.hungnt.hello_world.entity.User;
@@ -39,7 +38,7 @@ public class AuthenticationService {
 
     @NonFinal
     @Value("${jwt.signerKey}")
-    protected String SIGNER_KEY ;
+    protected String SIGNER_KEY;
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
@@ -48,11 +47,11 @@ public class AuthenticationService {
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);
 
-        return IntrospectResponse.builder().valid(verified && expityTime.after(new Date())).build();
+        return IntrospectResponse.builder().valid(verified && expiryTime.after(new Date())).build();
     }
 
         public AuthenticationResponse authenticate(AuthenticationRequest request) {

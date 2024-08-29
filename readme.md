@@ -11,5 +11,5 @@
 3. MYSQL:8.0.36-debian
 ```
 docker pull mysql:8.0.36-debian
-docker run --name -p 3307:3306 mysql-8.0.36 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.36-debian
+docker run --name mysql-8.0.36 -p 3307:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.36-debian
 ```
