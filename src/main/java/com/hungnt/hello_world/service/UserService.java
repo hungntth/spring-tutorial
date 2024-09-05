@@ -4,6 +4,7 @@ import com.hungnt.hello_world.dto.request.UserCreationRequest;
 import com.hungnt.hello_world.dto.request.UserUpdateRequest;
 import com.hungnt.hello_world.dto.response.UserResponse;
 import com.hungnt.hello_world.entity.User;
+import com.hungnt.hello_world.enums.Role;
 import com.hungnt.hello_world.exception.AppException;
 import com.hungnt.hello_world.exception.ErrorCode;
 import com.hungnt.hello_world.mapper.UserMapper;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -25,18 +27,22 @@ import java.util.List;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
-    public User createUser(UserCreationRequest request) {
+    public UserResponse createUser(UserCreationRequest request) {
 
 
         if(userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
         User user = userMapper.toUser(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return userRepository.save(user);
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        user.setRoles(roles);
+
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public List<User> findAllUser() {

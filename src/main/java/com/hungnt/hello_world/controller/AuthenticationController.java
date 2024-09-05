@@ -6,6 +6,7 @@ import com.hungnt.hello_world.dto.response.ApiResponse;
 import com.hungnt.hello_world.dto.request.AuthenticationRequest;
 import com.hungnt.hello_world.dto.response.AuthenticationResponse;
 import com.hungnt.hello_world.dto.response.IntrospectResponse;
+import com.hungnt.hello_world.dto.response.UserResponse;
 import com.hungnt.hello_world.entity.User;
 import com.hungnt.hello_world.service.AuthenticationService;
 import com.hungnt.hello_world.service.UserService;
@@ -36,8 +37,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
-        ApiResponse<User> apiResponse = new ApiResponse<>();
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
 
         apiResponse.setResult(userService.createUser(request));
         return apiResponse;
