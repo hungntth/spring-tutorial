@@ -1,21 +1,19 @@
-package com.hungnt.hello_world.entity;
+package com.hungnt.hello_world.dto.request;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity
-public class Permission {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
+public class RoleRequest {
     String name;
     String description;
+    Set<String> permissions;
 }
