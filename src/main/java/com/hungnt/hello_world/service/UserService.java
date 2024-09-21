@@ -8,6 +8,7 @@ import com.hungnt.hello_world.enums.Role;
 import com.hungnt.hello_world.exception.AppException;
 import com.hungnt.hello_world.exception.ErrorCode;
 import com.hungnt.hello_world.mapper.UserMapper;
+import com.hungnt.hello_world.repository.RoleRepository;
 import com.hungnt.hello_world.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public UserResponse createUser(UserCreationRequest request) {
 
@@ -47,9 +49,9 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('READ_DATA')")
     public List<User> findAllUser() {
-        log.info("In Method get User");
         return userRepository.findAll();
     }
 
@@ -62,6 +64,10 @@ public class UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
         userMapper.updateUser(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
