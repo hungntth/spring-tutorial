@@ -1,6 +1,8 @@
 package com.hungnt.hello_world.dto.request;
 
 import com.hungnt.hello_world.exception.ErrorCode;
+import com.hungnt.hello_world.validator.DobContraint;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,5 +21,7 @@ public class UserCreationRequest {
      String password;
      String firstName;
      String lastName;
+
+     @DobContraint(min = 18, message = "INVALID_DOB")
      LocalDate dob;
 }
