@@ -1,6 +1,7 @@
 package com.hungnt.hello_world.controller;
 
 import com.hungnt.hello_world.dto.request.IntrospectRequest;
+import com.hungnt.hello_world.dto.request.LogoutRequest;
 import com.hungnt.hello_world.dto.request.UserCreationRequest;
 import com.hungnt.hello_world.dto.response.ApiResponse;
 import com.hungnt.hello_world.dto.request.AuthenticationRequest;
@@ -56,5 +57,13 @@ public class AuthenticationController {
         var result = authService.introspect(request);
 
         return ApiResponse.<IntrospectResponse>builder().result(result).build();
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request)
+            throws ParseException, JOSEException {
+        authService.logout(request);
+        return ApiResponse.<Void>builder()
+                .build();
     }
 }

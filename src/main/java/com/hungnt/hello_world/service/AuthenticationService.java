@@ -2,11 +2,14 @@ package com.hungnt.hello_world.service;
 
 import com.hungnt.hello_world.dto.request.AuthenticationRequest;
 import com.hungnt.hello_world.dto.request.IntrospectRequest;
+import com.hungnt.hello_world.dto.request.LogoutRequest;
 import com.hungnt.hello_world.dto.response.AuthenticationResponse;
 import com.hungnt.hello_world.dto.response.IntrospectResponse;
+import com.hungnt.hello_world.entity.Token;
 import com.hungnt.hello_world.entity.User;
 import com.hungnt.hello_world.exception.AppException;
 import com.hungnt.hello_world.exception.ErrorCode;
+import com.hungnt.hello_world.repository.TokenRepository;
 import com.hungnt.hello_world.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -37,6 +40,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    TokenRepository tokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -45,6 +49,41 @@ public class AuthenticationService {
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
 
+       verifyToken(token);
+
+        return IntrospectResponse.builder().valid(true).build();
+    }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        var user = userRepository
+                .findByUsername(request.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXSITS));
+
+        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
+        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+    }
+
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        Token invalidatedToken = Token.builder()
+                .id(jit)
+                .expires(expiryTime)
+                .build();
+
+        tokenRepository.save(invalidatedToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
@@ -53,23 +92,15 @@ public class AuthenticationService {
 
         var verified = signedJWT.verify(verifier);
 
-        return IntrospectResponse.builder().valid(verified && expiryTime.after(new Date())).build();
-    }
-
-        public AuthenticationResponse authenticate(AuthenticationRequest request) {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            var user = userRepository
-                    .findByUsername(request.getUsername())
-                    .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXSITS));
-
-            boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
-
-            if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-            var token = generateToken(user);
-
-            return AuthenticationResponse.builder().token(token).authenticated(true).build();
+        if(!(verified && expiryTime.after(new Date()))) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+        log.info("tesst",tokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()));
+        if (tokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
+    }
 
     private String generateToken (User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -81,6 +112,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
+                .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
 
