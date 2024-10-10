@@ -13,3 +13,9 @@
 docker pull mysql:8.0.36-debian
 docker run --name mysql-8.0.36 -p 3307:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.36-debian
 ```
+4. Build docker
+```
+docker build -t hello-spring .
+docker run -d -p 5454:5454 hello-spring
+
+```
